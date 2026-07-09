@@ -1,0 +1,4 @@
+Database ready at: C:\Users\user\AppData\Local\Temp\opencode\hr-reserve-system\backend\hr_reserve.db
+HR Reserve System ishlayapti: http://localhost:3001
+Google Forms webhook: POST http://localhost:3001/api/webhook/google-forms
+Dashboard: http://localhost:3001
