@@ -213,7 +213,7 @@ export default function CandidateProfile() {
           )}
         </div>
 
-        {c.notes && (
+        {c.notes && typeof c.notes === 'string' && c.notes.length > 0 && (
           <div className="profile-section">
             <h3>HR Eslatmalari</h3>
             <p style={{ fontSize: 14, color: 'var(--gray-600)', whiteSpace: 'pre-wrap' }}>{c.notes}</p>
@@ -239,10 +239,10 @@ export default function CandidateProfile() {
           </div>
         )}
 
-        {c.notes && c.notes.length > 0 && (
+        {c.reminders && c.reminders.length > 0 && (
           <div className="profile-section">
             <h3>Eslatmalar</h3>
-            {c.notes.map((n, i) => (
+            {c.reminders.map((n) => (
               <div key={n.id} className="profile-field">
                 <span className="field-label" style={{ width: 140, fontSize: 12 }}>
                   {new Date(n.created_at).toLocaleDateString('uz-UZ')}

@@ -1,7 +1,7 @@
 {
-  "name": "hr-reserve-system",
+  "name": "hr-reserve-backend",
   "version": "1.0.0",
-  "description": "HR Reserve Management System",
+  "description": "HR Reserve System Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

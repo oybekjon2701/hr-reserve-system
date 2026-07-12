@@ -92,7 +92,7 @@ router.get('/:id', (req, res) => {
        ORDER BY sh.created_at DESC`, [req.params.id]
     );
 
-    const notes = queryAll(
+    const reminders = queryAll(
       `SELECT r.*, u.full_name as created_by_name
        FROM reminders r
        LEFT JOIN users u ON r.user_id = u.id
@@ -100,7 +100,7 @@ router.get('/:id', (req, res) => {
        ORDER BY r.created_at DESC`, [req.params.id]
     );
 
-    res.json({ ...mapCandidate(candidate), history, notes });
+    res.json({ ...mapCandidate(candidate), history, reminders });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

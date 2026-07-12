@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, useApi } from '../App';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from 'recharts';
+import { useApi } from '../App';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#8b5cf6', '#ec4899', '#14b8a6', '#6b7280'];
 const STATUS_LABELS = {
@@ -49,10 +49,10 @@ export default function Dashboard() {
 
   const statCards = [
     { label: 'Jami nomzodlar', value: stats.total, color: '#2563eb', bg: '#eff6ff', icon: '👥' },
-    { label: 'Bugun qo\'shilgan', value: stats.today, color: '#16a34a', bg: '#f0fdf4', icon: '📥' },
+    { label: "Bugun qo'shilgan", value: stats.today, color: '#16a34a', bg: '#f0fdf4', icon: '📥' },
     { label: 'Shu oy qo\'shilgan', value: stats.this_month, color: '#8b5cf6', bg: '#f5f3ff', icon: '📊' },
     { label: 'Yuqori salohiyat', value: stats.high_potential, color: '#f59e0b', bg: '#fffbeb', icon: '⭐' },
-    { label: 'O\'rtacha ball', value: Math.round(stats.avg_score), color: '#14b8a6', bg: '#f0fdfa', icon: '📈' },
+    { label: "O'rtacha ball", value: Math.round(stats.avg_score), color: '#14b8a6', bg: '#f0fdfa', icon: '📈' },
     { label: 'Kutilayotgan nomzodlar', value: stats.stale_candidates, color: '#dc2626', bg: '#fef2f2', icon: '⏰' },
     { label: 'Bildirishnomalar', value: stats.unread_notifications, color: '#f59e0b', bg: '#fffbeb', icon: '🔔' },
   ];
@@ -122,6 +122,30 @@ export default function Dashboard() {
               </Pie>
               <Tooltip />
             </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3>Ish tajribasi</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={stats.experience_distribution}>
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3>Lavozim bo'yicha (top 10)</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={stats.position_distribution} layout="vertical">
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApi, useAuth } from '../App';
+import { useApi } from '../App';
 
 const NOTIF_ICONS = {
-  'new_candidate': '🎉',
+  'new_candidate': '📥',
   'duplicate': '⚠️',
   'high_score': '⭐',
   'stale': '⏰',
@@ -20,60 +20,44 @@ const NOTIF_COLORS = {
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { request, addToast } = useApi();
   const navigate = useNavigate();
 
   const fetchNotifications = async () => {
     try {
-      const data = await request('/candidates/export/json');
-      const notifRes = await fetch('/api/candidates?limit=1', { headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('hr_auth')).token}` } });
-      const res = await fetch('/api/candidates?limit=1', { headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('hr_auth')).token}` } });
-      // Load notifications via the dashboard endpoint workaround
-      const dash = await request('/dashboard/stats');
-      // Direct notification fetching isn't exposed as a separate route yet,
-      // so we get candidates and generate notification-like data from dashboard
-      setNotifications([]);
-      setLoading(false);
+      const data = await request('/notifications');
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unread_count || 0);
     } catch (err) {
+      console.error(err);
+    } finally {
       setLoading(false);
     }
   };
 
-  // We need a direct notifications endpoint - let's check
-  useEffect(() => {
-    const token = JSON.parse(localStorage.getItem('hr_auth')).token;
-    fetch('/api/candidates?limit=50&sort_by=created_at', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(data => {
-        // Transform candidates into notification-like data for display
-        const notifs = (data.candidates || []).map(c => ({
-          id: `c-${c.id}`,
-          type: c.score >= 80 ? 'high_score' : 'new_candidate',
-          title: c.score >= 80 ? 'Yuqori ball' : 'Yangi nomzod',
-          message: c.score >= 80
-            ? `${c.full_name} ${c.score} ball bilan yuqori baholandi`
-            : `${c.full_name} tizimga qo'shildi`,
-          is_read: 0,
-          created_at: c.created_at,
-          candidate_id: c.id,
-          candidate_name: c.full_name
-        }));
-        setNotifications(notifs);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  useEffect(() => { fetchNotifications(); }, []);
 
   const markAllRead = async () => {
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
-    addToast('Barcha bildirishnomalar o\'qilgan deb belgilandi', 'success');
+    try {
+      await request('/notifications/read-all', { method: 'PUT' });
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
+      setUnreadCount(0);
+      addToast("Barcha bildirishnomalar o'qilgan deb belgilandi", 'success');
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
   };
 
-  const markRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: 1 } : n));
+  const markRead = async (id) => {
+    try {
+      await request(`/notifications/${id}/read`, { method: 'PUT' });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: 1 } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (loading) return <div className="loading"><div className="spinner" /> Yuklanmoqda...</div>;
@@ -83,11 +67,13 @@ export default function Notifications() {
       <div className="page-header">
         <div>
           <h1>Bildirishnomalar</h1>
-          <p>{notifications.filter(n => !n.is_read).length} ta o'qilmagan</p>
+          <p>{unreadCount} ta o'qilmagan</p>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={markAllRead}>
-          Barchasini o'qilgan deb belgilash
-        </button>
+        {unreadCount > 0 && (
+          <button className="btn btn-ghost btn-sm" onClick={markAllRead}>
+            Barchasini o'qilgan deb belgilash
+          </button>
+        )}
       </div>
 
       <div className="table-container">
@@ -111,7 +97,7 @@ export default function Notifications() {
                 <div className="notif-title">{n.title}</div>
                 <div className="notif-message">{n.message}</div>
                 <div className="notif-time">
-                  {new Date(n.created_at).toLocaleDateString('uz-UZ')}
+                  {new Date(n.created_at).toLocaleString('uz-UZ')}
                   {n.candidate_name && <span> · {n.candidate_name}</span>}
                 </div>
               </div>

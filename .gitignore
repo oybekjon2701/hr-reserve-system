@@ -1,0 +1,10 @@
+node_modules/
+*.db
+*.exe
+*.blob
+dist/
+bundle.js
+hr-bundle.js
+sql-wasm.wasm
+server.log
+.DS_Store

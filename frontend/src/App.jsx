@@ -1,11 +1,13 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import CandidateList from './components/CandidateList';
 import CandidateProfile from './components/CandidateProfile';
 import Notifications from './components/Notifications';
 import MockForm from './components/MockForm';
+import UserManagement from './components/UserManagement';
+import Reports from './components/Reports';
 import Navbar from './components/Navbar';
 
 const AuthContext = createContext(null);
@@ -46,6 +48,15 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [toasts, setToasts] = useState([]);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('hr_dark_mode') === 'true';
+  });
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    localStorage.setItem('hr_dark_mode', darkMode);
+  }, [darkMode]);
 
   const addToast = (message, type = 'info') => {
     const id = Date.now();
@@ -63,6 +74,8 @@ export default function App() {
     setAuth(null);
   };
 
+  const toggleDarkMode = () => setDarkMode(prev => !prev);
+
   if (!auth) {
     return (
       <>
@@ -73,7 +86,7 @@ export default function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, logout, addToast }}>
+    <AuthContext.Provider value={{ ...auth, login, logout, addToast, darkMode, toggleDarkMode, unreadNotifs, setUnreadNotifs }}>
       <div className="app-layout">
         <Navbar />
         <main className="main-content">
@@ -83,6 +96,8 @@ export default function App() {
             <Route path="/candidates/:id" element={<CandidateProfile />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/mock-form" element={<MockForm />} />
+            <Route path="/users" element={<UserManagement />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
